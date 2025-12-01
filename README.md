@@ -19,9 +19,9 @@ Define routes quickly, mock APIs instantly, and prototype without writing any ex
 
 ```yaml
 - route: GET /
-    contentType: text/plain
-    contents: |
-      Hello, World!
+  contentType: text/plain
+  contents: |
+    Hello, World!
 ```
 
 ## 🛠️ Installation
@@ -75,27 +75,31 @@ Example with multiple routes:
 
 ```yaml
 - route: GET /
-    contentType: text/plain
-    contents: |
-      Welcome!
+  contentType: text/plain
+  contents: |
+    Welcome!
 - route: GET /api/info
-    contentType: application/json
-    contents: |
-      { "name": "example", "version": 1 }
+  contentType: application/json
+  contents: |
+    { "name": "example", "version": 1 }
 - route: POST /submit
-    contentType: text/plain
-    contents: OK
+  contentType: text/plain
+  contents: OK
 ```
 
 ## 🧪 Testing
 
 Use curl:
 
-curl -i <http://localhost:8080/>
+```
+curl -i http://localhost:8080/
+```
 
 Check JSON route:
 
-curl -i <http://localhost:8080/api/info>
+```
+curl -i http://localhost:8080/api/info
+```
 
 ## 🤝 Contributing
 
