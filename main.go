@@ -15,9 +15,31 @@ type configFile struct {
 }
 
 type route struct {
-	Route       string `yaml:"route"`
-	ContentType string `yaml:"contentType"`
-	Contents    string `yaml:"contents"`
+	Route    string            `yaml:"route"`
+	Headers  map[string]string `yaml:"headers"`
+	Status   int               `yaml:"status"`
+	Contents string            `yaml:"body"`
+}
+
+func (r route) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	log.Printf("%s %s", req.RemoteAddr, r.Route)
+
+	if r.Status == 0 {
+		r.Status = 200
+	}
+
+	for k, v := range r.Headers {
+		w.Header().Set(k, v)
+	}
+	if w.Header().Get("Content-type") == "" {
+		w.Header().Set("Content-type", http.DetectContentType([]byte(r.Contents)))
+	}
+
+	w.WriteHeader(r.Status)
+
+	if _, err := w.Write([]byte(r.Contents)); err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
 }
 
 func loadConfigFile(filename string) (configFile, error) {
@@ -44,24 +66,13 @@ func main() {
 
 	config, err := loadConfigFile(configFile)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "unable to load config: ", err)
+		log.Fatalf("unable to read configfile %s: %v", configFile, err)
 	}
 
 	for _, v := range config.Routes {
-		http.HandleFunc(v.Route, func(w http.ResponseWriter, r *http.Request) {
-			log.Printf("%s %s", r.RemoteAddr, v.Route)
-
-			contentType := v.ContentType
-			if contentType == "" {
-				contentType = http.DetectContentType([]byte(v.Contents))
-			}
-
-			w.Header().Set("Content-type", contentType)
-			if _, err := w.Write([]byte(v.Contents)); err != nil {
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			}
-		})
+		http.Handle(v.Route, v)
 	}
 
+	log.Println("starting server on ", address)
 	log.Fatal(http.ListenAndServe(address, nil))
 }

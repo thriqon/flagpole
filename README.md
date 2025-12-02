@@ -13,16 +13,7 @@ Define routes quickly, mock APIs instantly, and prototype without writing any ex
 
 🚀 Perfect for mocks, demos, and rapid prototyping
 
-🔒 Predictable behavior — always responds with HTTP 200 OK
-
-📄 Example Configuration
-
-```yaml
-- route: GET /
-  contentType: text/plain
-  contents: |
-    Hello, World!
-```
+🔒 Predictable behavior
 
 ## 🛠️ Installation
 
@@ -43,11 +34,13 @@ go build -o flagpole
 
 Run the server with a YAML config:
 
+```
 ./flagpole -config-file routes.yaml
+```
 
 Default address is:
 
-<http://localhost:8080/>
+http://localhost:8080/
 
 To specify a custom port:
 
@@ -57,34 +50,17 @@ To specify a custom port:
 
 ## 📚 Configuration Reference
 
-Each route entry supports:
-
-| Field | Description | Required |
-|-------|-------------|----------|
-| route|HTTP method and path (e.g., GET /hello)|Yes |
-| contentType|MIME type returned in the Content-Type header|Yes|
-| contents|Response body returned to the client|Yes|
-
-Note:
-
-All responses always return status code 200
-
-No dynamic request handling — responses are literal from YAML.
-
-Example with multiple routes:
-
-```yaml
-- route: GET /
-  contentType: text/plain
-  contents: |
-    Welcome!
-- route: GET /api/info
-  contentType: application/json
-  contents: |
-    { "name": "example", "version": 1 }
-- route: POST /submit
-  contentType: text/plain
-  contents: OK
+```
+routes:
+  - route: GET /hello
+    headers:
+      Content-type: text/plain
+    body: |
+      Hello, World!
+  - route: GET /
+    status: 307
+    headers:
+      Location: /hello
 ```
 
 ## 🧪 Testing
@@ -94,7 +70,6 @@ Use curl:
 ```
 curl -i http://localhost:8080/
 ```
-
 Check JSON route:
 
 ```
