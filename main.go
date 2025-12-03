@@ -47,7 +47,11 @@ func loadConfigFile(filename string) (configFile, error) {
 	if err != nil {
 		return configFile{}, fmt.Errorf("unable to open file: %w", err)
 	}
-	defer f.Close()
+	defer func() {
+		if err := f.Close(); err != nil {
+			log.Fatalf("unable to close config file: %v", err)
+		}
+	}()
 
 	var cf configFile
 	if err := yaml.NewDecoder(f).Decode(&cf); err != nil {
