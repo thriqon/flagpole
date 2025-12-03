@@ -1,0 +1,86 @@
+project_name: flagpole
+before:
+  hooks:
+    - go mod tidy
+    - go mod download
+
+builds:
+  - id: flagpole
+    dir: .
+    main: .
+    binary: flagpole
+    env:
+      - CGO_ENABLED=0 # build a static binary without C dependencies
+    flags:
+      - -v
+      - -a
+    ldflags:
+      - -X main.version={{ .Version }} -X main.commit={{ .Commit }}
+    goos:
+      - darwin
+      - freebsd
+      - linux
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    goarm:
+      - "5"
+      - "6"
+      - "7"
+    ignore:
+      - goos: darwin
+        goarch: arm
+
+dockers:
+  - ids:
+      - flagpole
+    image_templates:
+      - ghcr.io/thriqon/{{ .ProjectName }}:{{ .Version }}-amd64
+    goos: linux
+    goarch: amd64
+    dockerfile: goreleaser.dockerfile
+    build_flag_templates:
+      - "--build-arg=BINARY_NAME={{ .ProjectName }}"
+      - "--platform=linux/amd64"
+    use: buildx
+  - ids:
+      - flagpole
+    image_templates:
+      - ghcr.io/thriqon/{{ .ProjectName }}:{{ .Version }}-arm64
+    goos: linux
+    goarch: arm64
+    dockerfile: goreleaser.dockerfile
+    build_flag_templates:
+      - "--build-arg=BINARY_NAME={{ .ProjectName }}"
+      - "--platform=linux/arm64"
+    use: buildx
+
+docker_manifests:
+  - name_template: "ghcr.io/thriqon/{{ .ProjectName }}:{{ .Version }}"
+    image_templates:
+      - "ghcr.io/thriqon/{{ .ProjectName }}:{{ .Version }}-amd64"
+      - "ghcr.io/thriqon/{{ .ProjectName }}:{{ .Version }}-arm64"
+
+archives:
+  - name_template: "{{ .ProjectName }}-{{ .Version }}.{{ .Os }}-{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}"
+    formats:
+      - tar.gz
+    wrap_in_directory: true
+
+checksum:
+  name_template: "{{ .ProjectName }}-{{ .Version }}_checksums.txt"
+  algorithm: sha256
+
+# Configuration for GitHub Releases
+release:
+  github:
+    owner: thriqon
+    name: flagpole
+  footer: |
+    ## Docker Images
+    - ghcr.io/thriqon/flagpole:{{ trimprefix .Tag "v" }} (universal, multi-platform)
+    - ghcr.io/thriqon/flagpole:{{ trimprefix .Tag "v" }}-amd64
+    - ghcr.io/thriqon/flagpole:{{ trimprefix .Tag "v" }}-arm64
+  prerelease: auto
+  replace_existing_draft: true
