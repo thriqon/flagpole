@@ -51,7 +51,6 @@ dockers:
     goarch: arm64
     dockerfile: Dockerfile
     build_flag_templates:
-      - "--build-arg=BINARY_NAME={{ .ProjectName }}"
       - "--platform=linux/arm64"
     use: buildx
 
