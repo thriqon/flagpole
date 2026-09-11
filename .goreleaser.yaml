@@ -39,9 +39,8 @@ dockers:
       - ghcr.io/thriqon/{{ .ProjectName }}:{{ .Version }}-amd64
     goos: linux
     goarch: amd64
-    dockerfile: goreleaser.dockerfile
+    dockerfile: Ddockerfile
     build_flag_templates:
-      - "--build-arg=BINARY_NAME={{ .ProjectName }}"
       - "--platform=linux/amd64"
     use: buildx
   - ids:
